@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ID="09b4b47e-6a6f-43bf-9327-f5c81c210544" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <GenerateTaskBasedAsynchronousMethod>true</GenerateTaskBasedAsynchronousMethod>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="C:\Users\DEV SOLUTIONS\Downloads\WS_MV_2025\WS MV 2025 - Actualización 03-12-2025\MV WSDL - XSD\IngresoManifestacionService\IngresoManifestacionService.wsdl" Protocol="file" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="IngresoManifestacionService.wsdl" MetadataType="Wsdl" ID="af3dc306-55c8-4ce1-9654-cd2965f3dbec" SourceId="1" SourceUrl="file:///C:/Users/DEV SOLUTIONS/Downloads/WS_MV_2025/WS MV 2025 - Actualización 03-12-2025/MV WSDL - XSD/IngresoManifestacionService/IngresoManifestacionService.wsdl" />
+    <MetadataFile FileName="IngresoManifestacionService.xsd" MetadataType="Schema" ID="5e35b54e-11ad-4f38-9d2c-62615f0fbff0" SourceId="1" SourceUrl="file:///C:/Users/DEV SOLUTIONS/Downloads/WS_MV_2025/WS MV 2025 - Actualización 03-12-2025/MV WSDL - XSD/IngresoManifestacionService/IngresoManifestacionService.xsd" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>

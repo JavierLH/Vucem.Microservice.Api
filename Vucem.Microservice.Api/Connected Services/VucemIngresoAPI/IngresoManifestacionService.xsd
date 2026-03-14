@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema xmlns:ns0="http://ws.ingresomanifestacion.manifestacion.www.ventanillaunica.gob.mx" targetNamespace="http://ws.ingresomanifestacion.manifestacion.www.ventanillaunica.gob.mx" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <xsd:complexType name="actualizarManifestacion">
+    <xsd:sequence>
+      <xsd:element minOccurs="0" name="informacionActualizarManifestacion" type="ns0:InformacionActualizarManifestacion" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="actualizarManifestacionResponse">
+    <xsd:sequence>
+      <xsd:element minOccurs="0" name="return" type="ns0:respuestaActualizarManifestacion" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="registroManifestacion">
+    <xsd:sequence>
+      <xsd:element minOccurs="0" name="informacionManifestacion" type="ns0:InformacionManifestacion" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="registroManifestacionResponse">
+    <xsd:sequence>
+      <xsd:element minOccurs="0" name="return" type="ns0:respuestaManifestacion" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="InformacionActualizarManifestacion">
+    <xsd:sequence>
+      <xsd:element name="firmaElectronica" type="ns0:FirmaElectronica" />
+      <xsd:element name="datosActualizarManifestacion" type="ns0:DatosActualizarManifestacion" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="FirmaElectronica">
+    <xsd:sequence>
+      <xsd:element name="certificado" type="xsd:base64Binary" />
+      <xsd:element name="cadenaOriginal" type="xsd:string" />
+      <xsd:element name="firma" type="xsd:base64Binary" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="DatosActualizarManifestacion">
+    <xsd:sequence>
+      <xsd:element name="numeroMV" type="xsd:string" />
+      <xsd:element name="documentos" type="ns0:Documentos" />
+      <xsd:element name="personasConsulta" type="ns0:PersonasConsulta" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="Documentos">
+    <xsd:sequence>
+      <xsd:element maxOccurs="unbounded" name="eDocument" type="xsd:string" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="PersonasConsulta">
+    <xsd:sequence>
+      <xsd:element minOccurs="0" maxOccurs="unbounded" name="personaConsulta" type="ns0:PersonaConsulta" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="PersonaConsulta">
+    <xsd:sequence>
+      <xsd:element name="rfc" type="xsd:string" />
+      <xsd:element name="tipoFigura" type="xsd:string" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="respuestaActualizarManifestacion">
+    <xsd:sequence>
+      <xsd:element minOccurs="0" maxOccurs="unbounded" name="mensaje" nillable="true" type="ns0:MensajeRespuesta" />
+      <xsd:element minOccurs="0" name="mensajeActualizar" type="xsd:string" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="MensajeRespuesta">
+    <xsd:sequence>
+      <xsd:element name="codigoError" type="xsd:string" />
+      <xsd:element name="descripcionError" type="xsd:string" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="InformacionManifestacion">
+    <xsd:sequence>
+      <xsd:element name="firmaElectronica" type="ns0:FirmaElectronica" />
+      <xsd:element name="importador-exportador" type="ns0:ImportadorExportador" />
+      <xsd:element name="datosManifestacionValor" type="ns0:DatosManifestacionValor" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="ImportadorExportador">
+    <xsd:sequence>
+      <xsd:element name="rfc" type="xsd:string" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="DatosManifestacionValor">
+    <xsd:sequence>
+      <xsd:element minOccurs="0" maxOccurs="unbounded" name="personaConsulta" type="ns0:PersonaConsulta" />
+      <xsd:element maxOccurs="unbounded" name="documentos" type="ns0:Documento" />
+      <xsd:element maxOccurs="unbounded" name="informacionCove" type="ns0:InformacionCove" />
+      <xsd:element name="valorEnAduana" type="ns0:ValorEnAduana" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="Documento">
+    <xsd:sequence>
+      <xsd:element minOccurs="0" name="eDocument" type="xsd:string" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="InformacionCove">
+    <xsd:sequence>
+      <xsd:element name="cove" type="xsd:string" />
+      <xsd:element name="incoterm" type="xsd:string" />
+      <xsd:element name="existeVinculacion" type="xsd:long" />
+      <xsd:element minOccurs="0" maxOccurs="unbounded" name="pedimento" nillable="true" type="ns0:Pedimento" />
+      <xsd:element maxOccurs="unbounded" name="precioPagado" type="ns0:PrecioPagado" />
+      <xsd:element maxOccurs="unbounded" name="precioPorPagar" type="ns0:PrecioPorPagar" />
+      <xsd:element maxOccurs="unbounded" name="compensoPago" type="ns0:CompensoPago" />
+      <xsd:element name="metodoValoracion" type="xsd:string" />
+      <xsd:element maxOccurs="unbounded" name="incrementables" type="ns0:Incrementables" />
+      <xsd:element maxOccurs="unbounded" name="decrementables" type="ns0:Decrementables" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="Pedimento">
+    <xsd:sequence>
+      <xsd:element minOccurs="0" name="pedimento" type="xsd:string" />
+      <xsd:element minOccurs="0" name="patente" type="xsd:string" />
+      <xsd:element minOccurs="0" name="aduana" type="xsd:string" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="PrecioPagado">
+    <xsd:sequence>
+      <xsd:element name="fechaPago" type="xsd:dateTime" />
+      <xsd:element name="total" type="xsd:decimal" />
+      <xsd:element name="tipoPago" type="xsd:string" />
+      <xsd:element minOccurs="0" name="especifique" type="xsd:string" />
+      <xsd:element name="tipoMoneda" type="xsd:string" />
+      <xsd:element name="tipoCambio" type="xsd:decimal" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="PrecioPorPagar">
+    <xsd:sequence>
+      <xsd:element name="fechaPago" type="xsd:dateTime" />
+      <xsd:element name="total" type="xsd:decimal" />
+      <xsd:element minOccurs="0" name="situacionNofechaPago" type="xsd:string" />
+      <xsd:element name="tipoPago" type="xsd:string" />
+      <xsd:element minOccurs="0" name="especifique" type="xsd:string" />
+      <xsd:element name="tipoMoneda" type="xsd:string" />
+      <xsd:element name="tipoCambio" type="xsd:decimal" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="CompensoPago">
+    <xsd:sequence>
+      <xsd:element name="tipoPago" type="xsd:string" />
+      <xsd:element name="fecha" type="xsd:dateTime" />
+      <xsd:element name="motivo" type="xsd:string" />
+      <xsd:element name="prestacionMercancia" type="xsd:string" />
+      <xsd:element minOccurs="0" name="especifique" type="xsd:string" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="Incrementables">
+    <xsd:sequence>
+      <xsd:element name="tipoIncrementable" type="xsd:string" />
+      <xsd:element name="fechaErogacion" type="xsd:dateTime" />
+      <xsd:element name="importe" type="xsd:decimal" />
+      <xsd:element name="tipoMoneda" type="xsd:string" />
+      <xsd:element name="tipoCambio" type="xsd:decimal" />
+      <xsd:element name="aCargoImportador" type="xsd:long" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="Decrementables">
+    <xsd:sequence>
+      <xsd:element name="tipoDecrementable" type="xsd:string" />
+      <xsd:element name="fechaErogacion" type="xsd:dateTime" />
+      <xsd:element name="importe" type="xsd:decimal" />
+      <xsd:element name="tipoMoneda" type="xsd:string" />
+      <xsd:element name="tipoCambio" type="xsd:decimal" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="ValorEnAduana">
+    <xsd:sequence>
+      <xsd:element name="totalPrecioPagado" type="xsd:decimal" />
+      <xsd:element name="totalPrecioPorPagar" type="xsd:decimal" />
+      <xsd:element name="totalIncrementables" type="xsd:decimal" />
+      <xsd:element name="totalDecrementables" type="xsd:decimal" />
+      <xsd:element name="totalValorAduana" type="xsd:decimal" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="respuestaManifestacion">
+    <xsd:sequence>
+      <xsd:element minOccurs="0" maxOccurs="unbounded" name="mensaje" nillable="true" type="ns0:MensajeRespuesta" />
+      <xsd:element name="numeroOperacion" type="xsd:long" />
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:element name="actualizarManifestacion" type="ns0:actualizarManifestacion" />
+  <xsd:element name="actualizarManifestacionResponse" type="ns0:actualizarManifestacionResponse" />
+  <xsd:element name="registroManifestacion" type="ns0:registroManifestacion" />
+  <xsd:element name="registroManifestacionResponse" type="ns0:registroManifestacionResponse" />
+  <xsd:element name="InformacionActualizarManifestacion" type="ns0:InformacionActualizarManifestacion" />
+  <xsd:element name="InformacionManifestacion" type="ns0:InformacionManifestacion" />
+</xsd:schema>
