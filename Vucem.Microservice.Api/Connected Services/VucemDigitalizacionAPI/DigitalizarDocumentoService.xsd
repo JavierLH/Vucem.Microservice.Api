@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<schema xmlns:Q1="http://www.ventanillaunica.gob.mx/common/ws/oxml/respuesta" xmlns:tns="http://www.ventanillaunica.gob.mx/aga/digitalizar/ws/oxml/DigitalizarDocumento" elementFormDefault="qualified" targetNamespace="http://www.ventanillaunica.gob.mx/aga/digitalizar/ws/oxml/DigitalizarDocumento" xmlns="http://www.w3.org/2001/XMLSchema">
+  <import schemaLocation="https://www.ventanillaunica.gob.mx:443/ventanilla/DigitalizarDocumentoService?xsd=2" namespace="http://www.ventanillaunica.gob.mx/common/ws/oxml/respuesta" />
+  <complexType name="RegistroDigitalizarDocumentoRequest">
+    <sequence>
+      <element minOccurs="1" maxOccurs="1" name="correoElectronico" type="string" />
+      <element minOccurs="1" maxOccurs="1" name="documento" type="tns:Documento" />
+      <element minOccurs="1" maxOccurs="1" name="peticionBase" type="Q1:PeticionBase" />
+    </sequence>
+  </complexType>
+  <complexType name="Documento">
+    <sequence>
+      <element minOccurs="1" maxOccurs="1" name="idTipoDocumento" type="int" />
+      <element minOccurs="1" maxOccurs="1" name="nombreDocumento" type="string" />
+      <element minOccurs="0" maxOccurs="1" name="rfcConsulta" nillable="true" type="string" />
+      <element xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmime:expectedContentTypes="application/pdf" minOccurs="1" maxOccurs="1" name="archivo" type="base64Binary" />
+    </sequence>
+  </complexType>
+  <complexType name="RegistroDigitalizarDocumentoResponse">
+    <sequence>
+      <element name="respuestaBase" type="Q1:RespuestaBase" />
+      <element minOccurs="1" maxOccurs="1" name="acuse" type="tns:AcuseDigitalizarDocumento" />
+    </sequence>
+  </complexType>
+  <complexType name="AcuseDigitalizarDocumento">
+    <sequence>
+      <element name="respuestaBase" type="Q1:RespuestaBase" />
+      <element minOccurs="1" maxOccurs="1" name="numeroOperacion" type="long" />
+      <element minOccurs="1" maxOccurs="1" name="horaRecepcion" type="dateTime" />
+      <element minOccurs="1" maxOccurs="1" name="mensaje" type="string" />
+    </sequence>
+  </complexType>
+  <element name="registroDigitalizarDocumentoServiceRequest" type="tns:RegistroDigitalizarDocumentoRequest" />
+  <element name="registroDigitalizarDocumentoServiceResponse" type="tns:RegistroDigitalizarDocumentoResponse" />
+  <complexType name="ConsultaDigitalizarDocumentoRequest">
+    <sequence>
+      <element minOccurs="1" maxOccurs="1" name="numeroOperacion" type="long" />
+      <element minOccurs="1" maxOccurs="1" name="peticionBase" type="Q1:PeticionBase" />
+    </sequence>
+  </complexType>
+  <complexType name="ConsultaDigitalizarDocumentoResponse">
+    <sequence>
+      <element minOccurs="1" maxOccurs="1" name="numeroDeTramite" type="string" />
+      <element minOccurs="1" maxOccurs="1" name="eDocument" type="string" />
+      <element minOccurs="1" maxOccurs="1" name="cadenaOriginal" type="string" />
+      <element minOccurs="1" maxOccurs="1" name="respuestaBase" type="Q1:RespuestaBase" />
+    </sequence>
+  </complexType>
+  <complexType name="TipoDeDocumento">
+    <sequence>
+      <element minOccurs="1" maxOccurs="1" name="idTipoDeDocumento" type="long" />
+      <element minOccurs="1" maxOccurs="1" name="descripcion" type="string" />
+    </sequence>
+  </complexType>
+  <complexType name="ConsultaTipoDeDocumentoRequest">
+    <sequence>
+      <element name="peticionBase" type="Q1:PeticionBase" />
+    </sequence>
+  </complexType>
+  <complexType name="ConsultaTipoDeDocumentoResponse">
+    <sequence>
+      <element minOccurs="1" maxOccurs="1" name="tiposDeDocumentos" type="tns:ListaTipoDeDocumentos" />
+      <element minOccurs="1" maxOccurs="1" name="respuestaBase" type="Q1:RespuestaBase" />
+    </sequence>
+  </complexType>
+  <element name="consultaDigitalizarDocumentoServiceRequest" type="tns:ConsultaDigitalizarDocumentoRequest" />
+  <element name="consultaDigitalizarDocumentoServiceResponse" type="tns:ConsultaDigitalizarDocumentoResponse" />
+  <element name="consultaTipoDocumentoServiceResponse" type="tns:ConsultaTipoDeDocumentoResponse" />
+  <element name="consultaTipoDocumentoServiceRequest" nillable="true" type="tns:ConsultaTipoDeDocumentoRequest" />
+  <complexType name="ListaTipoDeDocumentos">
+    <sequence>
+      <element minOccurs="0" maxOccurs="unbounded" name="tipoDeDocumento" type="tns:TipoDeDocumento" />
+    </sequence>
+  </complexType>
+</schema>

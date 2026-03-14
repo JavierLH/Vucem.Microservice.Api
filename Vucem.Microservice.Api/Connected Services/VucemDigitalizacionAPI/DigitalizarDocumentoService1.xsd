@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema xmlns:tns="http://www.ventanillaunica.gob.mx/common/ws/oxml/respuesta" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.ventanillaunica.gob.mx/common/ws/oxml/respuesta" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <xsd:complexType name="FirmaElectronica">
+    <xsd:annotation>
+      <xsd:documentation>Datos de la firma electronica</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element minOccurs="1" name="certificado" type="xsd:base64Binary">
+        <xsd:annotation>
+          <xsd:documentation>Certificado Digital. Archivo .cert de la firma
+						digital en una cadena en formato hexadecimal</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element minOccurs="1" name="cadenaOriginal" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation>Cadena original con los datos enviados. se
+						define de acuerdo a la informacion enviada y varia segun la
+						peticion.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element minOccurs="1" name="firma" type="xsd:base64Binary">
+        <xsd:annotation>
+          <xsd:documentation>Firma digital generada. Se espera un string en
+						formato hexadecimal. para generarla la cdena original debe estar
+						en ISO-8859-1. (type encoding) </xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="Acuse">
+    <xsd:annotation>
+      <xsd:documentation> &lt;pre&gt; Acuse de Recibo de la petición &lt;/pre&gt;
+			</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element minOccurs="1" name="numeroDeOperacion" type="xsd:integer">
+        <xsd:annotation>
+          <xsd:documentation>Numero de operacion de recepcion
+					</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element minOccurs="1" name="horaRecepcion" type="xsd:dateTime">
+        <xsd:annotation>
+          <xsd:documentation>Hora de recepcion de la peticion
+					</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element minOccurs="1" name="mensajeInformativo" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation>Mensaje informativo</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="Errores">
+    <xsd:annotation>
+      <xsd:documentation>Lista de errores al recivbir la petición.
+				cualquier problema que se presente se indicara como una cadena en
+				este elemento</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element minOccurs="0" maxOccurs="unbounded" name="mensaje" type="xsd:string">
+        <xsd:annotation>
+          <xsd:documentation>Mensaje del error</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="RespuestaBase">
+    <xsd:annotation>
+      <xsd:documentation>Respuesta estandard sin firma electronica, pero
+				con lista de errores. Las respuestas extenderan este tipo si no
+				requieren firma electronica</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element minOccurs="1" name="tieneError" type="xsd:boolean">
+        <xsd:annotation>
+          <xsd:documentation>Bandera que inidca si hubo algun error en la
+						peticion</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element minOccurs="0" maxOccurs="unbounded" name="error" type="tns:Errores">
+        <xsd:annotation>
+          <xsd:documentation>Lista de errores en la peticion
+					</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+  <xsd:complexType name="PeticionBase">
+    <xsd:annotation>
+      <xsd:documentation>Respuesta estandard con firma electronica. Las
+				respuestas extenderan este tipo si requieren firma electronica
+			</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element minOccurs="1" name="firmaElectronica" type="tns:FirmaElectronica">
+        <xsd:annotation>
+          <xsd:documentation>Firma electroncia de la peticion
+					</xsd:documentation>
+        </xsd:annotation>
+      </xsd:element>
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

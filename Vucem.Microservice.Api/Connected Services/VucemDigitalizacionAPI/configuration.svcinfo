@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<configurationSnapshot xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="urn:schemas-microsoft-com:xml-wcfconfigurationsnapshot">
+  <behaviors />
+  <bindings>
+    <binding digest="System.ServiceModel.Configuration.CustomBindingElement, System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089:&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;&lt;Data name=&quot;IReceptorEndpointBinding&quot;&gt;&lt;httpsTransport /&gt;&lt;mtomMessageEncoding messageVersion=&quot;Soap11&quot; /&gt;&lt;/Data&gt;" bindingType="customBinding" name="IReceptorEndpointBinding" />
+  </bindings>
+  <endpoints>
+    <endpoint normalizedDigest="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;&lt;Data address=&quot;https://www.ventanillaunica.gob.mx:8117/ventanilla/DigitalizarDocumentoService&quot; binding=&quot;customBinding&quot; bindingConfiguration=&quot;IReceptorEndpointBinding&quot; contract=&quot;VucemDigitalizacionAPI.IReceptor&quot; name=&quot;IReceptorBinding&quot; /&gt;" digest="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;&lt;Data address=&quot;https://www.ventanillaunica.gob.mx:8117/ventanilla/DigitalizarDocumentoService&quot; binding=&quot;customBinding&quot; bindingConfiguration=&quot;IReceptorEndpointBinding&quot; contract=&quot;VucemDigitalizacionAPI.IReceptor&quot; name=&quot;IReceptorBinding&quot; /&gt;" contractName="VucemDigitalizacionAPI.IReceptor" name="IReceptorBinding" />
+  </endpoints>
+</configurationSnapshot>

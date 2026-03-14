@@ -77,7 +77,7 @@ namespace Vucem.Microservice.Api.Security
 
         public object BeforeSendRequest(ref Message request, IClientChannel channel)
         {
-            // Limpiamos la acción basura que pueda meter Microsoft
+            // Limpiamos la acción basura
             request.Headers.RemoveAll("Action", "http://schemas.microsoft.com/ws/2005/05/addressing/none");
 
             // Inyectamos nuestro encabezado perfecto
@@ -86,7 +86,17 @@ namespace Vucem.Microservice.Api.Security
             return null;
         }
 
-        public void AfterReceiveReply(ref Message reply, object correlationState) { }
+        // ¡AQUÍ ESTÁ LA MAGIA PARA EL ERROR MUST-UNDERSTAND!
+        public void AfterReceiveReply(ref Message reply, object correlationState)
+        {
+            // El SAT nos responde con un encabezado de seguridad (acuse).
+            // Le decimos a WCF que "ya entendimos" todos los encabezados que mandó el SAT 
+            // para que deje pasar el mensaje y no arroje la excepción ProtocolException.
+            for (int i = 0; i < reply.Headers.Count; i++)
+            {
+                reply.Headers.UnderstoodHeaders.Add(reply.Headers[i]);
+            }
+        }
     }
 
     public class VucemEndpointBehavior : IEndpointBehavior
