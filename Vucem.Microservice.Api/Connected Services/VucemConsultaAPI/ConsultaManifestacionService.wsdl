@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsp="http://www.w3.org/ns/ws-policy" xmlns:wsp1_2="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://ws.consultamanifestacion.manifestacion.www.ventanillaunica.gob.mx" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wssutil="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" name="ConsultaManifestacionService" targetNamespace="http://ws.consultamanifestacion.manifestacion.www.ventanillaunica.gob.mx" xmlns="http://schemas.xmlsoap.org/wsdl/">
+  <wsp:UsingPolicy wssutil:Required="true" />
+  <wsp1_2:Policy wssutil:Id="Wssp1.2-2007-Https-UsernameToken-Plain.xml">
+    <ns1:TransportBinding xmlns:ns1="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702">
+      <wsp1_2:Policy>
+        <ns1:TransportToken>
+          <wsp1_2:Policy>
+            <ns1:HttpsToken />
+          </wsp1_2:Policy>
+        </ns1:TransportToken>
+        <ns1:AlgorithmSuite>
+          <wsp1_2:Policy>
+            <ns1:Basic256 />
+          </wsp1_2:Policy>
+        </ns1:AlgorithmSuite>
+        <ns1:Layout>
+          <wsp1_2:Policy>
+            <ns1:Lax />
+          </wsp1_2:Policy>
+        </ns1:Layout>
+        <ns1:IncludeTimestamp />
+      </wsp1_2:Policy>
+    </ns1:TransportBinding>
+    <ns2:SupportingTokens xmlns:ns2="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702">
+      <wsp1_2:Policy>
+        <ns2:UsernameToken ns2:IncludeToken="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/IncludeToken/AlwaysToRecipient">
+          <wsp1_2:Policy>
+            <ns2:WssUsernameToken10 />
+          </wsp1_2:Policy>
+        </ns2:UsernameToken>
+      </wsp1_2:Policy>
+    </ns2:SupportingTokens>
+  </wsp1_2:Policy>
+  <types>
+    <xsd:schema>
+      <xsd:import schemaLocation="ConsultaManifestacionService.xsd" namespace="http://ws.consultamanifestacion.manifestacion.www.ventanillaunica.gob.mx" />
+    </xsd:schema>
+  </types>
+  <message name="consultaManifestacion">
+    <part name="parameters" element="tns:consultaManifestacion" />
+  </message>
+  <message name="consultaManifestacionResponse">
+    <part name="parameters" element="tns:consultaManifestacionResponse" />
+  </message>
+  <portType name="ConsultaManifestacionRemote">
+    <operation name="consultaManifestacion">
+      <input wsam:Action="http://ws.consultamanifestacion.manifestacion.www.ventanillaunica.gob.mx/ConsultaManifestacionRemote/consultaManifestacionRequest" message="tns:consultaManifestacion" />
+      <output wsam:Action="http://ws.consultamanifestacion.manifestacion.www.ventanillaunica.gob.mx/ConsultaManifestacionRemote/consultaManifestacionResponse" message="tns:consultaManifestacionResponse" />
+    </operation>
+  </portType>
+  <binding name="ConsultaManifestacionPortBinding" type="tns:ConsultaManifestacionRemote">
+    <wsp:PolicyReference URI="#Wssp1.2-2007-Https-UsernameToken-Plain.xml" />
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <operation name="consultaManifestacion">
+      <soap:operation soapAction="" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+  </binding>
+  <service name="ConsultaManifestacionService">
+    <port name="ConsultaManifestacionPort" binding="tns:ConsultaManifestacionPortBinding">
+      <soap:address location="https://privados.ventanillaunica.gob.mx/ConsultaManifestacionImpl/ConsultaManifestacionService" />
+    </port>
+  </service>
+</definitions>
