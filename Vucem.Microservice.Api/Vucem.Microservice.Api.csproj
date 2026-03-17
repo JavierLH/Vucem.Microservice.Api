@@ -156,6 +156,11 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
+    <Compile Include="Connected Services\VucemConsultaAPI\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
     <Compile Include="Connected Services\VucemDigitalizacionAPI\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -169,6 +174,9 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManifiestoController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
+    <Compile Include="Dto\PeticionConsultaCoveDto.cs" />
+    <Compile Include="Dto\PeticionConsultaDigitalizacionDto.cs" />
+    <Compile Include="Dto\PeticionConsultaTiposDocDto.cs" />
     <Compile Include="Dto\PeticionDigitalizacionDto.cs" />
     <Compile Include="Dto\PeticionVucemDto.cs" />
     <Compile Include="Global.asax.cs">
@@ -179,12 +187,28 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />
+    <None Include="Connected Services\VucemConsultaAPI\ConsultaManifestacionService.wsdl" />
+    <None Include="Connected Services\VucemConsultaAPI\ConsultaManifestacionService.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <Content Include="Connected Services\VucemConsultaAPI\Vucem.Microservice.Api.VucemConsultaAPI.consultaManifestacionResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
+    <Content Include="Connected Services\VucemConsultaAPI\Vucem.Microservice.Api.VucemConsultaAPI.RespuestaConsultaGeneral.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Content>
     <None Include="Connected Services\VucemDigitalizacionAPI\DigitalizarDocumento.wsdl" />
     <None Include="Connected Services\VucemDigitalizacionAPI\DigitalizarDocumentoService.xsd">
       <SubType>Designer</SubType>
     </None>
     <None Include="Connected Services\VucemDigitalizacionAPI\DigitalizarDocumentoService1.xsd">
       <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\VucemConsultaAPI\configuration91.svcinfo" />
+    <None Include="Connected Services\VucemConsultaAPI\configuration.svcinfo" />
+    <None Include="Connected Services\VucemConsultaAPI\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
     </None>
     <Content Include="Connected Services\VucemDigitalizacionAPI\Vucem.Microservice.Api.VucemDigitalizacionAPI.ConsultaDigitalizarDocumentoResponse.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
@@ -375,6 +399,7 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
+    <WCFMetadataStorage Include="Connected Services\VucemConsultaAPI\" />
     <WCFMetadataStorage Include="Connected Services\VucemDigitalizacionAPI\" />
     <WCFMetadataStorage Include="Connected Services\VucemIngresoAPI\" />
   </ItemGroup>

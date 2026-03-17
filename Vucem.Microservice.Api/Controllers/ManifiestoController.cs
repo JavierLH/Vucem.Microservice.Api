@@ -35,14 +35,19 @@ namespace Vucem.Microservice.Api.Controllers
                         firma = firmaBytes,
                         certificado = certBytes
                     },
-                    importadorexportador = new ImportadorExportador { rfc = peticion.RfcImportador }
+                    importadorexportador = new ImportadorExportador { rfc = peticion.RfcImportador },
+                    datosManifestacionValor = new Vucem.Microservice.Api.VucemIngresoAPI.DatosManifestacionValor
+                    {
+                        // ... Mapear aquí todas las propiedades requeridas por VUCEM (conceptos, valores, tipo de operación, etc.)
+                        // Estas propiedades deberían venir de tu objeto 'peticion' (PeticionVucemDto)
+                    }
                 };
 
                 var textEncoding = new System.ServiceModel.Channels.TextMessageEncodingBindingElement(System.ServiceModel.Channels.MessageVersion.Soap11, System.Text.Encoding.UTF8);
                 var httpsTransport = new System.ServiceModel.Channels.HttpsTransportBindingElement { MaxReceivedMessageSize = int.MaxValue, MaxBufferSize = int.MaxValue };
                 var binding = new System.ServiceModel.Channels.CustomBinding(textEncoding, httpsTransport) { SendTimeout = TimeSpan.FromMinutes(30) };
 
-                var endpoint = new System.ServiceModel.EndpointAddress("https://privados.ventanillaunica.gob.mx/IngresoManifestacionImpl/IngresoManifestacionService");
+                var endpoint = new System.ServiceModel.EndpointAddress("https://privados.ventanillaunica.gob.mx/IngresoManifestacionImpl/IngresoManifestacionService?wsdl");
                 var client = new IngresoManifestacionRemoteClient(binding, endpoint);
 
                 var mustUnderstand = client.Endpoint.Behaviors.Find<System.ServiceModel.Description.MustUnderstandBehavior>();
@@ -280,6 +285,67 @@ namespace Vucem.Microservice.Api.Controllers
         //    catch (Exception ex) { return InternalServerError(ex); }
         //}
 
+
+        // =========================================================================
+        // 6. CONSULTAR CATÁLOGO DE TIPOS DE DOCUMENTO (Para llenar los Dropdowns)
+        // =========================================================================
+        [HttpPost]
+        [Route("digitalizar/tipos-documento")]
+        public async Task<IHttpActionResult> ConsultarTiposDocumento([FromBody] PeticionConsultaTiposDocDto peticion)
+        {
+            try
+            {
+                if (peticion == null) return BadRequest("JSON inválido.");
+
+                System.Net.ServicePointManager.Expect100Continue = false;
+                System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+
+                // 1. Convertimos la FIEL
+                byte[] firmaBytes = ConvertirBase64Seguro(peticion.FirmaBase64);
+                byte[] certBytes = ConvertirBase64Seguro(peticion.CertificadoBase64);
+
+                // 2. Armamos la petición con la FIEL obligatoria
+                var peticionVucem = new Vucem.Microservice.Api.VucemDigitalizacionAPI.ConsultaTipoDeDocumentoRequest
+                {
+                    peticionBase = new Vucem.Microservice.Api.VucemDigitalizacionAPI.PeticionBase
+                    {
+                        firmaElectronica = new Vucem.Microservice.Api.VucemDigitalizacionAPI.FirmaElectronica
+                        {
+                            cadenaOriginal = peticion.CadenaOriginal,
+                            firma = firmaBytes,
+                            certificado = certBytes
+                        }
+                    }
+                };
+
+                // 3. MTOM siempre para Digitalización
+                var mtomEncoding = new System.ServiceModel.Channels.MtomMessageEncodingBindingElement(System.ServiceModel.Channels.MessageVersion.Soap11, System.Text.Encoding.UTF8);
+                var httpsTransport = new System.ServiceModel.Channels.HttpsTransportBindingElement { MaxReceivedMessageSize = int.MaxValue, MaxBufferSize = int.MaxValue };
+                var binding = new System.ServiceModel.Channels.CustomBinding(mtomEncoding, httpsTransport) { SendTimeout = TimeSpan.FromMinutes(30) };
+
+                var endpoint = new System.ServiceModel.EndpointAddress("https://www.ventanillaunica.gob.mx/ventanilla/DigitalizarDocumentoService");
+                var client = new ReceptorClient(binding, endpoint);
+
+                var mustUnderstand = client.Endpoint.Behaviors.Find<System.ServiceModel.Description.MustUnderstandBehavior>();
+                if (mustUnderstand != null) mustUnderstand.ValidateMustUnderstand = false;
+
+                // 4. Inyectamos la seguridad de Transporte (WCF)
+                client.Endpoint.Behaviors.Add(new VucemEndpointBehavior(peticion.UsuarioWcf, peticion.PasswordWcf));
+
+                var respuesta = await client.ConsultaTipoDeDocumentoAsync(peticionVucem);
+
+                if (respuesta != null && respuesta.consultaTipoDocumentoServiceResponse != null)
+                {
+                    return Ok(respuesta.consultaTipoDocumentoServiceResponse);
+                }
+
+                return Ok(respuesta);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
 
         private byte[] ConvertirBase64Seguro(string base64String)
         {
