@@ -2,3 +2,32 @@ echo ".vs/" > .gitignore
 echo "bin/" >> .gitignore
 echo "obj/" >> .gitignore
 echo "packages/" >> .gitignore
+
+
+## Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docattachments
+
+## Build results
+[Bb]in/
+[Oo]bj/
+
+## NuGet Packages
+packages/
+*.nupkg
+
+## User-specific files
+*.rsuser
+*.suo
+*.user
+*.userhost
+*.userstorage
+
+## Entity Framework (si generas logs o archivos temporales)
+*.log
+
+## AWS (si usas AWS Toolkit)
+.aws/

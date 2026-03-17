@@ -45,6 +45,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BouncyCastle.Cryptography, Version=2.0.0.0, Culture=neutral, PublicKeyToken=072edcf4a5328938, processorArchitecture=MSIL">
+      <HintPath>..\packages\BouncyCastle.Cryptography.2.6.2\lib\net461\BouncyCastle.Cryptography.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -156,7 +159,8 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
-    <Compile Include="Connected Services\VucemConsultaAPI\Reference.cs">
+    <Compile Include="Connected Services\VucemConsultaAPI\Reference.cs" />
+    <Compile Include="Connected Services\VucemConsultaAPI\Reference1.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Reference.svcmap</DependentUpon>
@@ -176,7 +180,6 @@
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Dto\PeticionConsultaCoveDto.cs" />
     <Compile Include="Dto\PeticionConsultaDigitalizacionDto.cs" />
-    <Compile Include="Dto\PeticionConsultaTiposDocDto.cs" />
     <Compile Include="Dto\PeticionDigitalizacionDto.cs" />
     <Compile Include="Dto\PeticionVucemDto.cs" />
     <Compile Include="Global.asax.cs">
@@ -191,12 +194,8 @@
     <None Include="Connected Services\VucemConsultaAPI\ConsultaManifestacionService.xsd">
       <SubType>Designer</SubType>
     </None>
-    <Content Include="Connected Services\VucemConsultaAPI\Vucem.Microservice.Api.VucemConsultaAPI.consultaManifestacionResponse.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </Content>
-    <Content Include="Connected Services\VucemConsultaAPI\Vucem.Microservice.Api.VucemConsultaAPI.RespuestaConsultaGeneral.datasource">
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </Content>
+    <Content Include="Connected Services\VucemConsultaAPI\Vucem.Microservice.Api.VucemConsultaAPI.consultaManifestacionResponse.datasource" />
+    <Content Include="Connected Services\VucemConsultaAPI\Vucem.Microservice.Api.VucemConsultaAPI.RespuestaConsultaGeneral.datasource" />
     <None Include="Connected Services\VucemDigitalizacionAPI\DigitalizarDocumento.wsdl" />
     <None Include="Connected Services\VucemDigitalizacionAPI\DigitalizarDocumentoService.xsd">
       <SubType>Designer</SubType>
@@ -204,11 +203,11 @@
     <None Include="Connected Services\VucemDigitalizacionAPI\DigitalizarDocumentoService1.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Connected Services\VucemConsultaAPI\configuration91.svcinfo" />
     <None Include="Connected Services\VucemConsultaAPI\configuration.svcinfo" />
+    <None Include="Connected Services\VucemConsultaAPI\configuration91.svcinfo" />
     <None Include="Connected Services\VucemConsultaAPI\Reference.svcmap">
       <Generator>WCF Proxy Generator</Generator>
-      <LastGenOutput>Reference.cs</LastGenOutput>
+      <LastGenOutput>Reference1.cs</LastGenOutput>
     </None>
     <Content Include="Connected Services\VucemDigitalizacionAPI\Vucem.Microservice.Api.VucemDigitalizacionAPI.ConsultaDigitalizarDocumentoResponse.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
@@ -399,7 +398,6 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
-    <WCFMetadataStorage Include="Connected Services\VucemConsultaAPI\" />
     <WCFMetadataStorage Include="Connected Services\VucemDigitalizacionAPI\" />
     <WCFMetadataStorage Include="Connected Services\VucemIngresoAPI\" />
   </ItemGroup>
