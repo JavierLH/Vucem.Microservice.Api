@@ -1,11 +1,23 @@
-﻿using System;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Security;
+using System;
+using System.Linq;
+using System.Security.Cryptography;
 using System.ServiceModel;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Vucem.Microservice.Api.Security;
-using Vucem.Microservice.Api.VucemIngresoAPI;
-using Vucem.Microservice.Api.VucemDigitalizacionAPI; 
 using Vucem.Microservice.Api.Dto;
+using Vucem.Microservice.Api.Security;
+using Vucem.Microservice.Api.VucemDigitalizacionAPI; 
+using Vucem.Microservice.Api.VucemIngresoAPI;
+
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Security;
+using System.Text;
+using System.Linq;
+using System.Security.Cryptography;
+using Vucem.Microservice.Api.VucemDigitalizacionAPI; // Para que reconozca ReceptorClient
 namespace Vucem.Microservice.Api.Controllers
 {
     [RoutePrefix("api/vucem")]
@@ -119,6 +131,150 @@ namespace Vucem.Microservice.Api.Controllers
             catch (Exception ex) { return InternalServerError(ex); }
         }
 
+        [HttpGet]
+        [Route("ejecutar")]
+        public async Task<IHttpActionResult> EjecutarHardcodeado()
+        {
+            try
+            {
+                // ==========================================
+                // 1. DATOS HARDCODEADOS
+                // ==========================================
+                string usuarioWcf = "QAO680613E91";
+                string passwordWcf = "k5QPKge7lTUFNsgjsM4I2oirN2wO67/09qlaNPgpmLXl1cB0Ov9e8Td2JjfBi1Nh";
+
+                string rfcSolicitante = "QAO680613E91";
+                string correo = "javiercitonandez@gmail.com";
+                int idTipoDocumento = 170;
+                string nombreDocumento = "Factura_Prueba_02"; // El nombre DEBE IR SIN la extensión .pdf
+                string rfcConsulta = "RERA540709F98";
+                string passwordLlave = "Qualtia23";
+
+                System.Net.ServicePointManager.Expect100Continue = false;
+                System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+
+                // ==========================================
+                // 2. LECTURA DE ARCHIVOS LOCALES
+                // ==========================================
+                string rutaBase = @"C:\Users\javi2\Desktop\Qualtia Alimentos\";
+
+                // REEMPLAZA ESTOS NOMBRES POR LOS NOMBRES REALES DE TUS ARCHIVOS
+                string nombreCer = "00001000000517319189.cer";
+                string nombreKey = "CSD_VUCEM_QAO680613E91_20230119_105407.key";
+                string nombrePdf = "Doc1.pdf";
+
+                byte[] certBytes = System.IO.File.ReadAllBytes(rutaBase + nombreCer);
+                byte[] llavePrivadaBytes = System.IO.File.ReadAllBytes(rutaBase + nombreKey);
+                byte[] archivoPdfBytes = System.IO.File.ReadAllBytes(rutaBase + nombrePdf);
+
+                // ==========================================
+                // 3. CREACIÓN DEL HASH Y CADENA ORIGINAL
+                // ==========================================
+                string hashPdfHex;
+                using (SHA1 sha1 = SHA1.Create())
+                {
+                    byte[] hashBytes = sha1.ComputeHash(archivoPdfBytes);
+                    hashPdfHex = string.Concat(hashBytes.Select(b => b.ToString("x2")));
+                }
+
+                StringBuilder cadenaBuilder = new StringBuilder();
+                cadenaBuilder.Append("|").Append(rfcSolicitante);
+                cadenaBuilder.Append("|").Append(correo);
+                cadenaBuilder.Append("|").Append(idTipoDocumento);
+                cadenaBuilder.Append("|").Append(nombreDocumento);
+                // Siempre debe llevar el pipe, incluso si `rfcConsulta` está vacío
+                cadenaBuilder.Append("|").Append(rfcConsulta ?? "");
+                cadenaBuilder.Append("|").Append(hashPdfHex).Append("|");
+
+                string cadenaOriginal = cadenaBuilder.ToString();
+
+                System.Diagnostics.Debug.WriteLine(cadenaOriginal);
+
+                // ==========================================
+                // 4. FIRMADO ELECTRÓNICO CON BOUNCYCASTLE
+                // ==========================================
+                byte[] firmaBytes;
+                AsymmetricKeyParameter llavePrivadaBouncy;
+
+                try
+                {
+                    llavePrivadaBouncy = PrivateKeyFactory.DecryptKey(passwordLlave.ToCharArray(), llavePrivadaBytes);
+                }
+                catch
+                {
+                    return BadRequest("Error al desencriptar el archivo .key. Verifica que la contraseña sea la correcta.");
+                }
+
+                // VUCEM exige SHA256 para certificados nuevos de e.firma
+                ISigner signer = SignerUtilities.GetSigner("SHA256WithRSA");
+                signer.Init(true, llavePrivadaBouncy);
+
+                byte[] datosAFirmar = Encoding.UTF8.GetBytes(cadenaOriginal);
+                signer.BlockUpdate(datosAFirmar, 0, datosAFirmar.Length);
+
+                firmaBytes = signer.GenerateSignature();
+
+                // ==========================================
+                // 5. LLENADO DE OBJETOS WCF 
+                // ==========================================
+                var peticionVucem = new Vucem.Microservice.Api.VucemDigitalizacionAPI.RegistroDigitalizarDocumentoRequest
+                {
+                    correoElectronico = correo,
+                    documento = new Vucem.Microservice.Api.VucemDigitalizacionAPI.Documento
+                    {
+                        idTipoDocumento = idTipoDocumento,
+                        nombreDocumento = nombreDocumento,
+                        rfcConsulta = rfcConsulta,
+                        archivo = archivoPdfBytes
+                    },
+                    peticionBase = new Vucem.Microservice.Api.VucemDigitalizacionAPI.PeticionBase
+                    {
+                        firmaElectronica = new Vucem.Microservice.Api.VucemDigitalizacionAPI.FirmaElectronica
+                        {
+                            cadenaOriginal = cadenaOriginal,
+                            firma = firmaBytes,
+                            certificado = certBytes
+                        }
+                    }
+                };
+
+                // ==========================================
+                // 6. CONFIGURACIÓN DEL CANAL MTOM Y SEGURIDAD
+                // ==========================================
+                var mtomEncoding = new System.ServiceModel.Channels.MtomMessageEncodingBindingElement(System.ServiceModel.Channels.MessageVersion.Soap11, System.Text.Encoding.UTF8);
+                var httpsTransport = new System.ServiceModel.Channels.HttpsTransportBindingElement { MaxReceivedMessageSize = int.MaxValue, MaxBufferSize = int.MaxValue };
+                var binding = new System.ServiceModel.Channels.CustomBinding(mtomEncoding, httpsTransport) { SendTimeout = TimeSpan.FromMinutes(30) };
+
+                var endpoint = new System.ServiceModel.EndpointAddress("https://www.ventanillaunica.gob.mx/ventanilla/DigitalizarDocumentoService");
+
+                var client = new ReceptorClient(binding, endpoint);
+
+                var mustUnderstand = client.Endpoint.Behaviors.Find<System.ServiceModel.Description.MustUnderstandBehavior>();
+                if (mustUnderstand != null) mustUnderstand.ValidateMustUnderstand = false;
+
+                client.Endpoint.Behaviors.Add(new VucemEndpointBehavior(usuarioWcf, passwordWcf));
+
+                // ==========================================
+                // 7. DISPARO DE LA PETICIÓN
+                // ==========================================
+                var respuesta = await client.RegistroDigitalizarDocumentoAsync(peticionVucem);
+
+                if (respuesta.registroDigitalizarDocumentoServiceResponse != null)
+                {
+                    return Ok(respuesta.registroDigitalizarDocumentoServiceResponse);
+                }
+
+                return Ok(respuesta);
+            }
+            catch (FaultException ex)
+            {
+                return BadRequest($"Error de Negocio VUCEM: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
 
 
         // =========================================================================
@@ -170,6 +326,113 @@ namespace Vucem.Microservice.Api.Controllers
                 return Ok(respuesta);
             }
             catch (Exception ex) { return InternalServerError(ex); }
+        }
+
+        // =========================================================================
+        // 3.5. EJECUTAR CONSULTAR E-DOCUMENT HARDCODEADO (Por Número de Operación)
+        // =========================================================================
+        [HttpGet]
+        [Route("digitalizar/consultar-ejecutar")]
+        public async Task<IHttpActionResult> EjecutarNoOperacion()
+        {
+            try
+            {
+                // ==========================================
+                // 1. DATOS DE NEGOCIO Y CREDENCIALES WCF
+                // ==========================================
+                string usuarioWcf = "QAO680613E91";
+                string passwordWcf = "k5QPKge7lTUFNsgjsM4I2oirN2wO67/09qlaNPgpmLXl1cB0Ov9e8Td2JjfBi1Nh";
+
+                // <-- REEMPLAZA POR EL NÚMERO DE OPERACIÓN QUE TE DIO EL ENDPOINT EJECUTAR -->
+                long numeroOperacion = 317019055; 
+                string passwordLlave = "Qualtia23";
+
+                System.Net.ServicePointManager.Expect100Continue = false;
+                System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+
+                // ==========================================
+                // 2. LECTURA DE ARCHIVOS DESDE LA PC
+                // ==========================================
+                string rutaBase = @"C:\Users\javi2\Desktop\Qualtia Alimentos\";
+                string nombreCer = "00001000000517319189.cer";
+                string nombreKey = "CSD_VUCEM_QAO680613E91_20230119_105407.key";
+
+                byte[] certBytes = System.IO.File.ReadAllBytes(rutaBase + nombreCer);
+                byte[] llavePrivadaBytes = System.IO.File.ReadAllBytes(rutaBase + nombreKey);
+
+                // ==========================================
+                // 3. CONSTRUCCIÓN DE LA CADENA ORIGINAL
+                // ==========================================
+                // VUCEM para ConsultaEDocument exige el formato |{rfc}|{numeroOperacion}|
+                string rfcSolicitante = "QAO680613E91";
+                string cadenaOriginal = $"|{rfcSolicitante}|{numeroOperacion}|";
+
+                // ==========================================
+                // 4. FIRMADO CON BOUNCYCASTLE
+                // ==========================================
+                byte[] firmaBytes;
+                AsymmetricKeyParameter llavePrivadaBouncy;
+
+                try
+                {
+                    llavePrivadaBouncy = PrivateKeyFactory.DecryptKey(passwordLlave.ToCharArray(), llavePrivadaBytes);
+                }
+                catch
+                {
+                    return BadRequest("Error al abrir el archivo .key. Verifica la contraseña.");
+                }
+
+                // Usamos SHA256WithRSA que es el estándar actual para VUCEM e.firma
+                ISigner signer = SignerUtilities.GetSigner("SHA256WithRSA");
+                signer.Init(true, llavePrivadaBouncy);
+
+                byte[] datosAFirmar = Encoding.UTF8.GetBytes(cadenaOriginal);
+                signer.BlockUpdate(datosAFirmar, 0, datosAFirmar.Length);
+                firmaBytes = signer.GenerateSignature();
+
+                // ==========================================
+                // 5. ARMADO DEL OBJETO
+                // ==========================================
+                var peticionVucem = new Vucem.Microservice.Api.VucemDigitalizacionAPI.ConsultaDigitalizarDocumentoRequest
+                {
+                    numeroOperacion = numeroOperacion,
+                    peticionBase = new Vucem.Microservice.Api.VucemDigitalizacionAPI.PeticionBase
+                    {
+                        firmaElectronica = new Vucem.Microservice.Api.VucemDigitalizacionAPI.FirmaElectronica
+                        {
+                            cadenaOriginal = cadenaOriginal,
+                            firma = firmaBytes,
+                            certificado = certBytes
+                        }
+                    }
+                };
+
+                // ==========================================
+                // 6. ENVÍO AL WEB SERVICE
+                // ==========================================
+                var mtomEncoding = new System.ServiceModel.Channels.MtomMessageEncodingBindingElement(System.ServiceModel.Channels.MessageVersion.Soap11, System.Text.Encoding.UTF8);
+                var httpsTransport = new System.ServiceModel.Channels.HttpsTransportBindingElement { MaxReceivedMessageSize = int.MaxValue, MaxBufferSize = int.MaxValue };
+                var binding = new System.ServiceModel.Channels.CustomBinding(mtomEncoding, httpsTransport) { SendTimeout = TimeSpan.FromMinutes(30) };
+
+                var endpoint = new System.ServiceModel.EndpointAddress("https://www.ventanillaunica.gob.mx/ventanilla/DigitalizarDocumentoService");
+                var client = new ReceptorClient(binding, endpoint);
+
+                var mustUnderstand = client.Endpoint.Behaviors.Find<System.ServiceModel.Description.MustUnderstandBehavior>();
+                if (mustUnderstand != null) mustUnderstand.ValidateMustUnderstand = false;
+
+                client.Endpoint.Behaviors.Add(new VucemEndpointBehavior(usuarioWcf, passwordWcf));
+
+                var respuesta = await client.ConsultaEDocumentDigitalizarDocumentoAsync(peticionVucem);
+                return Ok(respuesta);
+            }
+            catch (FaultException ex)
+            {
+                return BadRequest($"Error de Negocio VUCEM: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
         }
 
         // =========================================================================
