@@ -181,6 +181,8 @@
     <Compile Include="Dto\PeticionConsultaCoveDto.cs" />
     <Compile Include="Dto\PeticionConsultaDigitalizacionDto.cs" />
     <Compile Include="Dto\PeticionDigitalizacionDto.cs" />
+    <Compile Include="Dto\PeticionEjecutarConsultaDto.cs" />
+    <Compile Include="Dto\PeticionEjecutarDigitalizacionDto.cs" />
     <Compile Include="Dto\PeticionVucemDto.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
