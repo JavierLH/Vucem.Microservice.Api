@@ -638,6 +638,18 @@ namespace Vucem.Microservice.Api.Controllers
                 byte[] llavePrivadaBytes = ConvertirBase64Seguro(peticion.LlavePrivadaBase64);
                 byte[] archivoPdfBytes = ConvertirBase64Seguro(peticion.ArchivoPdfBase64);
 
+                if (archivoPdfBytes.Length > 2621440)
+                {
+                    return BadRequest("El archivo PDF supera el tamaño máximo permitido por VUCEM (aprox. 2.5MB). Reduzca la resolución del documento.");
+                }
+                string rfcSol = peticion.RfcSolicitante?.Trim().ToUpper();
+                string correo = peticion.Correo?.Trim();
+                string rfcCon = peticion.RfcConsulta?.Trim().ToUpper() ?? "";
+
+                // Removemos la extensión .pdf si el usuario la mandó por error
+                string nomDoc = peticion.NombreDocumento?.Replace(".pdf", "").Replace(".PDF", "");
+                // Removemos acentos, espacios, la letra ñ, etc. (Dejamos solo letras, números, guiones y guiones bajos)
+                nomDoc = System.Text.RegularExpressions.Regex.Replace(nomDoc ?? "Documento", @"[^a-zA-Z0-9_-]", "");
                 // ==========================================
                 // 2. CREACIÓN DEL HASH Y CADENA ORIGINAL
                 // ==========================================
@@ -649,12 +661,11 @@ namespace Vucem.Microservice.Api.Controllers
                 }
 
                 StringBuilder cadenaBuilder = new StringBuilder();
-                cadenaBuilder.Append("|").Append(peticion.RfcSolicitante);
-                cadenaBuilder.Append("|").Append(peticion.Correo);
+                cadenaBuilder.Append("|").Append(rfcSol);
+                cadenaBuilder.Append("|").Append(correo);
                 cadenaBuilder.Append("|").Append(peticion.IdTipoDocumento);
-                cadenaBuilder.Append("|").Append(peticion.NombreDocumento);
-                // Siempre debe llevar el pipe, incluso si `rfcConsulta` está vacío
-                cadenaBuilder.Append("|").Append(peticion.RfcConsulta ?? "");
+                cadenaBuilder.Append("|").Append(nomDoc);
+                cadenaBuilder.Append("|").Append(rfcCon); // rfcCon ya es un string vacío ("") si venía nulo
                 cadenaBuilder.Append("|").Append(hashPdfHex).Append("|");
 
                 string cadenaOriginal = cadenaBuilder.ToString();
@@ -688,12 +699,13 @@ namespace Vucem.Microservice.Api.Controllers
                 // ==========================================
                 var peticionVucem = new Vucem.Microservice.Api.VucemDigitalizacionAPI.RegistroDigitalizarDocumentoRequest
                 {
-                    correoElectronico = peticion.Correo,
+                    correoElectronico = correo, // <-- Usamos la variable limpia
                     documento = new Vucem.Microservice.Api.VucemDigitalizacionAPI.Documento
                     {
                         idTipoDocumento = peticion.IdTipoDocumento,
-                        nombreDocumento = peticion.NombreDocumento,
-                        rfcConsulta = peticion.RfcConsulta,
+                        nombreDocumento = nomDoc, // <-- Usamos el nombre sin .pdf y sin acentos
+                                                  // VUCEM suele preferir que el nodo rfcConsulta no viaje si está vacío
+                        rfcConsulta = string.IsNullOrEmpty(rfcCon) ? null : rfcCon,
                         archivo = archivoPdfBytes
                     },
                     peticionBase = new Vucem.Microservice.Api.VucemDigitalizacionAPI.PeticionBase
@@ -706,6 +718,7 @@ namespace Vucem.Microservice.Api.Controllers
                         }
                     }
                 };
+
 
                 // ==========================================
                 // 5. CONFIGURACIÓN DEL CANAL MTOM Y SEGURIDAD
