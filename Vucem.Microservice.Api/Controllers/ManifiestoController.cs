@@ -79,19 +79,19 @@ namespace Vucem.Microservice.Api.Controllers
                             // Objeto Pedimento anidado
                             pedimento = string.IsNullOrEmpty(c.NumeroPedimento) ? null : new Vucem.Microservice.Api.VucemIngresoAPI.Pedimento[]
                             {
-                            new Vucem.Microservice.Api.VucemIngresoAPI.Pedimento
-                            {
-                                pedimento = c.NumeroPedimento,
-                                aduana = c.Aduana,
-                                patente = c.Patente
-                            }
+                new Vucem.Microservice.Api.VucemIngresoAPI.Pedimento
+                {
+                    pedimento = c.NumeroPedimento,
+                    aduana = c.Aduana,
+                    patente = c.Patente
+                }
                             },
 
                             // Listas de Precios Pagados
                             precioPagado = c.PreciosPagados?.Select(p => new Vucem.Microservice.Api.VucemIngresoAPI.PrecioPagado
                             {
                                 total = p.Total,
-                                fechaPago = p.FechaPago ?? DateTime.Now,
+                                fechaPago = DateTime.SpecifyKind(p.FechaPago.Value, DateTimeKind.Unspecified),
                                 tipoPago = p.TipoPago,
                                 tipoMoneda = p.TipoMoneda,
                                 tipoCambio = p.TipoCambio,
@@ -102,7 +102,7 @@ namespace Vucem.Microservice.Api.Controllers
                             precioPorPagar = c.PreciosPorPagar?.Select(p => new Vucem.Microservice.Api.VucemIngresoAPI.PrecioPorPagar
                             {
                                 total = p.Total,
-                                fechaPago = p.FechaPago ?? DateTime.Now,
+                                fechaPago = DateTime.SpecifyKind(p.FechaPago.Value, DateTimeKind.Unspecified),
                                 situacionNofechaPago = p.SituacionNoFechaPago,
                                 tipoPago = p.TipoPago,
                                 tipoMoneda = p.TipoMoneda,
@@ -113,7 +113,7 @@ namespace Vucem.Microservice.Api.Controllers
                             // Compensaciones
                             compensoPago = c.Compensaciones?.Select(comp => new Vucem.Microservice.Api.VucemIngresoAPI.CompensoPago
                             {
-                                fecha = comp.Fecha ?? DateTime.Now,
+                                fecha = DateTime.SpecifyKind(comp.Fecha.Value, DateTimeKind.Unspecified),
                                 motivo = comp.Motivo,
                                 prestacionMercancia = comp.PrestacionMercancia,
                                 tipoPago = comp.TipoPago,
@@ -125,7 +125,7 @@ namespace Vucem.Microservice.Api.Controllers
                             {
                                 tipoIncrementable = inc.ClaveConcepto,
                                 importe = inc.Importe,
-                                fechaErogacion = inc.FechaErogacion ?? DateTime.Now,
+                                fechaErogacion = DateTime.SpecifyKind(inc.FechaErogacion.Value, DateTimeKind.Unspecified),
                                 tipoMoneda = inc.TipoMoneda,
                                 tipoCambio = inc.TipoCambio,
                                 aCargoImportador = inc.AcargoImportador ? 1 : 0
@@ -136,7 +136,7 @@ namespace Vucem.Microservice.Api.Controllers
                             {
                                 tipoDecrementable = dec.ClaveConcepto,
                                 importe = dec.Importe,
-                                fechaErogacion = dec.FechaErogacion ?? DateTime.Now,
+                                fechaErogacion = DateTime.SpecifyKind(dec.FechaErogacion.Value, DateTimeKind.Unspecified),
                                 tipoMoneda = dec.TipoMoneda,
                                 tipoCambio = dec.TipoCambio
                             }).ToArray()
