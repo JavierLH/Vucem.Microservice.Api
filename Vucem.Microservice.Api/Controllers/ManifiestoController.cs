@@ -852,6 +852,150 @@ namespace Vucem.Microservice.Api.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("actualizar-edocuments")]
+        public async Task<IHttpActionResult> ActualizarEdocuments([FromBody] PeticionActualizarMvDto peticion)
+        {
+            try
+            {
+                if (peticion == null) return BadRequest("El JSON enviado es inválido.");
+
+                System.Net.ServicePointManager.Expect100Continue = false;
+                System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+
+                // 1. Convertir Base64 a Bytes (Usando tu método seguro)
+                byte[] certBytes = ConvertirBase64Seguro(peticion.CertificadoBase64);
+                byte[] keyBytes = ConvertirBase64Seguro(peticion.LlavePrivadaBase64);
+
+                // 2. Mapeo de Personas a Consultar
+                var personasConsulta = peticion.PersonasConsulta?.Select(p => new Vucem.Microservice.Api.VucemIngresoAPI.PersonaConsulta
+                {
+                    rfc = p.RfcConsulta,
+                    tipoFigura = p.TipoFigura
+                }).ToArray();
+
+                // 3. Armar los Datos de Actualización
+                var datosActualizar = new Vucem.Microservice.Api.VucemIngresoAPI.DatosActualizarManifestacion
+                {
+                    numeroMV = peticion.NumeroMV,
+                    documentos = peticion.Edocuments?.ToArray(),
+                    personasConsulta = personasConsulta
+                };
+
+                // ==========================================================
+                // 4. GENERAR CADENA ORIGINAL (Regla estricta VUCEM)
+                // Formato: |NumeroMV|eDoc1|eDoc2|RFC1|Figura1|
+                // ==========================================================
+                var sb = new StringBuilder();
+                sb.Append("|");
+                sb.Append(datosActualizar.numeroMV).Append("|");
+
+                if (datosActualizar.documentos != null)
+                {
+                    foreach (var doc in datosActualizar.documentos)
+                    {
+                        sb.Append(doc).Append("|");
+                    }
+                }
+
+                if (datosActualizar.personasConsulta != null)
+                {
+                    foreach (var persona in datosActualizar.personasConsulta)
+                    {
+                        sb.Append(persona.rfc).Append("|");
+                        sb.Append(persona.tipoFigura).Append("|");
+                    }
+                }
+                string cadenaOriginal = sb.ToString();
+
+                // 5. Firmar la Cadena Original (Usando BouncyCastle que ya tienes)
+                byte[] firmaBytes = FirmarCadenaConBouncyCastle(cadenaOriginal, keyBytes, peticion.PasswordLlave);
+
+                // 6. Armar la Petición Completa para WCF
+                var request = new Vucem.Microservice.Api.VucemIngresoAPI.InformacionActualizarManifestacion
+                {
+                    datosActualizarManifestacion = datosActualizar,
+                    firmaElectronica = new Vucem.Microservice.Api.VucemIngresoAPI.FirmaElectronica
+                    {
+                        certificado = certBytes,
+                        cadenaOriginal = cadenaOriginal,
+                        firma = firmaBytes
+                    }
+                };
+
+                // 7. Configuración WCF (Mismo endpoint que el Ingreso)
+                var textEncoding = new System.ServiceModel.Channels.TextMessageEncodingBindingElement(System.ServiceModel.Channels.MessageVersion.Soap11, System.Text.Encoding.UTF8);
+                var httpsTransport = new System.ServiceModel.Channels.HttpsTransportBindingElement { MaxReceivedMessageSize = int.MaxValue, MaxBufferSize = int.MaxValue };
+                var binding = new System.ServiceModel.Channels.CustomBinding(textEncoding, httpsTransport) { SendTimeout = TimeSpan.FromMinutes(30) };
+
+                var endpoint = new System.ServiceModel.EndpointAddress("https://privados.ventanillaunica.gob.mx/IngresoManifestacionImpl/IngresoManifestacionService?wsdl");
+                var client = new VucemIngresoAPI.IngresoManifestacionRemoteClient(binding, endpoint);
+
+                var mustUnderstand = client.Endpoint.Behaviors.Find<System.ServiceModel.Description.MustUnderstandBehavior>();
+                if (mustUnderstand != null) mustUnderstand.ValidateMustUnderstand = false;
+
+                client.Endpoint.Behaviors.Add(new VucemEndpointBehavior(peticion.UsuarioWcf, peticion.PasswordWcf));
+
+                // 8. ENVIAR A VUCEM
+                var respuesta = await client.actualizarManifestacionAsync(request);
+
+                return Ok(respuesta);
+            }
+            catch (FaultException ex) { return BadRequest($"Error de Negocio VUCEM: {ex.Message}"); }
+            catch (Exception ex) { return InternalServerError(ex); }
+        }
+
+
+        [HttpPost]
+        [Route("consultar-mv")]
+        public async Task<IHttpActionResult> ConsultarManifestacion([FromBody] PeticionConsultaMvDto peticion)
+        {
+            try
+            {
+                if (peticion == null) return BadRequest("JSON inválido.");
+
+                System.Net.ServicePointManager.Expect100Continue = false;
+                System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+
+                // 1. Armamos el objeto nativo de VUCEM para buscar por Número de Operación
+                var peticionVucem = new Vucem.Microservice.Api.VucemConsultaAPI.datosManifestacionGeneral
+                {
+                    numeroOperacion = peticion.NumeroOperacion,
+                    numeroOperacionSpecified = true // OBLIGATORIO para que WCF serialice el número
+                };
+
+                // 2. Configurar la Red WCF (Consulta usa TextMessageEncoding, no MTOM)
+                var textEncoding = new System.ServiceModel.Channels.TextMessageEncodingBindingElement(System.ServiceModel.Channels.MessageVersion.Soap11, System.Text.Encoding.UTF8);
+                var httpsTransport = new System.ServiceModel.Channels.HttpsTransportBindingElement { MaxReceivedMessageSize = int.MaxValue, MaxBufferSize = int.MaxValue };
+                var binding = new System.ServiceModel.Channels.CustomBinding(textEncoding, httpsTransport) { SendTimeout = TimeSpan.FromMinutes(30) };
+
+                // URL directa del WSDL de Consulta
+                var endpoint = new System.ServiceModel.EndpointAddress("https://privados.ventanillaunica.gob.mx/ConsultaManifestacionImpl/ConsultaManifestacionService?wsdl");
+
+                // El Cliente generado por Visual Studio
+                var client = new Vucem.Microservice.Api.VucemConsultaAPI.ConsultaManifestacionRemoteClient(binding, endpoint);
+
+                // 3. Candado MustUnderstand y Credenciales WSS
+                var mustUnderstand = client.Endpoint.Behaviors.Find<System.ServiceModel.Description.MustUnderstandBehavior>();
+                if (mustUnderstand != null) mustUnderstand.ValidateMustUnderstand = false;
+
+                client.Endpoint.Behaviors.Add(new VucemEndpointBehavior(peticion.UsuarioWcf, peticion.PasswordWcf));
+
+                // 4. Ejecutamos la consulta asíncrona
+                var respuesta = await client.consultaManifestacionAsync(peticionVucem);
+
+                // 5. Desempaquetamos la propiedad @return para mandar un JSON limpio a .NET 8
+                if (respuesta != null && respuesta.@return != null)
+                {
+                    return Ok(respuesta.@return);
+                }
+
+                return Ok(respuesta);
+            }
+            catch (FaultException ex) { return BadRequest($"Error de Negocio VUCEM: {ex.Message}"); }
+            catch (Exception ex) { return InternalServerError(ex); }
+        }
+
         private byte[] ConvertirBase64Seguro(string base64String)
         {
             if (string.IsNullOrWhiteSpace(base64String))

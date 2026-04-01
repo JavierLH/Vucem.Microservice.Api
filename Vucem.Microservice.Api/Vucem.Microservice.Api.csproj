@@ -178,8 +178,10 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManifiestoController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
+    <Compile Include="Dto\PeticionActualizarMvDto.cs" />
     <Compile Include="Dto\PeticionConsultaCoveDto.cs" />
     <Compile Include="Dto\PeticionConsultaDigitalizacionDto.cs" />
+    <Compile Include="Dto\PeticionConsultaMvDto.cs" />
     <Compile Include="Dto\PeticionDigitalizacionDto.cs" />
     <Compile Include="Dto\PeticionEjecutarConsultaDto.cs" />
     <Compile Include="Dto\PeticionEjecutarDigitalizacionDto.cs" />
@@ -324,6 +326,7 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Models\" />
+    <Folder Include="Service\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Scripts\bootstrap.min.js.map" />
